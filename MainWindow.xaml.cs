@@ -37,7 +37,7 @@ namespace 光线追综
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             cw = 600.0 / 2;
-                
+
             ch = 600.0 / 2;
 
             WriteableBitmap = new WriteableBitmap(800, 800, 96, 96, PixelFormats.Bgr32, BitmapPalettes.WebPaletteTransparent);
