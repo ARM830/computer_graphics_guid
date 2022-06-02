@@ -94,7 +94,9 @@ namespace 光线追综
             {
                 return new Point();
             }
-            return new Point((-b + discrinimant * discrinimant) / (2 * a), (-b - discrinimant * discrinimant) / (2 * a));
+            var t1 = (-b + Math.Sqrt(discrinimant)) / (2 * a);
+            var t2 = (-b - Math.Sqrt(discrinimant)) / (2 * a);
+            return new Point(t1, t2);
         }
         double cw = 0;
         double ch = 0;
