@@ -21,6 +21,19 @@ namespace 光线追综
     /// </summary>
     public partial class MainWindow : Window
     {
+        enum LightEnum
+        {
+            Ambient,
+            Point,
+            Directional
+        }
+        class Light
+        {
+            public Vector3D Direction { get; set; }
+            public Vector3D Position { get; set; }
+            public LightEnum LightType { get; set; }
+            public double Intenesity { get; set; }
+        }
         class sharp
         {
             public Vector3D center { get; set; }
@@ -50,13 +63,48 @@ namespace 光线追综
         {
         new sharp() { center = new Vector3D(0, -1, 3), color = Colors.Red },
         new sharp() { center = new Vector3D(2, 0, 4),  color = Colors.Blue },
-        new sharp() { center = new Vector3D(-2, 0, 4), color = Colors.Green }
+        new sharp() { center = new Vector3D(-2, 0, 4), color = Colors.Green },
+        new sharp(){center=new Vector3D(0,-5001,0), radius=5000,color=Color.FromRgb(255,255,0) },
+        };
+        List<Light> lightlist = new List<Light> {
+
+        new Light(){  LightType= LightEnum.Ambient,Intenesity=0.2 },
+        new Light(){  LightType= LightEnum.Point,Intenesity=0.6,Position=new Vector3D(2,1,0) },
+        new Light(){  LightType= LightEnum.Directional,Intenesity=0.2,Direction=new Vector3D(1,4,4) }
         };
         Point MidPoint(Point p) => new Point(p.X + 800.0 / 2, 800.0 / 2 - p.Y);
         Vector3D canvastoviewport(Point p)
         {
 
             return new Vector3D(p.X * (vw / cw), p.Y * (vh / ch), d);
+        }
+        double ComputeLighting(Vector3D p, Vector3D n)
+        {
+            double i = 0;
+            Vector3D l = new Vector3D();
+            foreach (var light in lightlist)
+            {
+                switch (light.LightType)
+                {
+                    case LightEnum.Ambient:
+                        i += light.Intenesity;
+                        break;
+                    case LightEnum.Point:
+                        l = light.Position - p;
+                        break;
+                    case LightEnum.Directional:
+                        l = light.Direction;
+                        break;
+                    default:
+                        break;
+                }
+                var dot = Vector3D.DotProduct(n, l);
+                if (dot > 0)
+                {
+                    i += light.Intenesity * dot / (n.Length * l.Length);
+                }
+            }
+            return i;
         }
         Color tracrray(Vector3D origin, Vector3D dline, double min, double max)
         {
@@ -80,7 +128,12 @@ namespace 光线追综
             {
                 return Colors.White;
             }
-            return claset_sharp.color;
+            var p = origin + (closet * dline);
+            var n = p - claset_sharp.center;
+            n = n / n.Length;
+            var cl = ComputeLighting(p, n);
+
+            return Color.FromRgb((byte)(cl * claset_sharp.color.R), (byte)(cl * claset_sharp.color.G), (byte)(cl * claset_sharp.color.B));
         }
         Point IntersectRayShere(Vector3D origin, Vector3D dline, sharp sharp)
         {
@@ -94,7 +147,9 @@ namespace 光线追综
             {
                 return new Point();
             }
-            return new Point((-b + discrinimant * discrinimant) / (2 * a), (-b - discrinimant * discrinimant) / (2 * a));
+            var t1 = (-b + Math.Sqrt(discrinimant)) / (2 * a);
+            var t2 = (-b - Math.Sqrt(discrinimant)) / (2 * a);
+            return new Point(t1, t2);
         }
         double cw = 0;
         double ch = 0;
