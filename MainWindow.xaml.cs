@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,6 +40,7 @@ namespace 光线追综
             public Vector3D center { get; set; }
             public double radius { get; set; } = 1;
             public Color color { get; set; }
+            public double specular { get; set; }
         }
         public MainWindow()
         {
@@ -49,11 +51,11 @@ namespace 光线追综
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            cw = 600.0 / 2;
+            cw = 800.0 / 2;
 
-            ch = 600.0 / 2;
+            ch = 800.0 / 2;
 
-            WriteableBitmap = new WriteableBitmap(800, 800, 96, 96, PixelFormats.Bgr32, BitmapPalettes.WebPaletteTransparent);
+            WriteableBitmap = new WriteableBitmap(800, 800, 96, 96, PixelFormats.Bgra32, BitmapPalettes.WebPaletteTransparent);
             img.Source = WriteableBitmap;
             Start();
         }
@@ -61,10 +63,10 @@ namespace 光线追综
         WriteableBitmap WriteableBitmap;
         List<sharp> sharplist = new List<sharp>
         {
-        new sharp() { center = new Vector3D(0, -1, 3), color = Colors.Red },
-        new sharp() { center = new Vector3D(2, 0, 4),  color = Colors.Blue },
-        new sharp() { center = new Vector3D(-2, 0, 4), color = Colors.Green },
-        new sharp(){center=new Vector3D(0,-5001,0), radius=5000,color=Color.FromRgb(255,255,0) },
+        new sharp() { center = new Vector3D(0, -1, 3), color = Colors.Red,specular=500 },
+        new sharp() { center = new Vector3D(2, 0, 4),  color = Colors.Blue,specular=500 },
+        new sharp() { center = new Vector3D(-2, 0, 4), color = Colors.Green ,specular=10},
+        new sharp(){center=new Vector3D(0,-5001,0), radius=5000,color=Color.FromRgb(255,255,0) ,specular=1000},
         };
         List<Light> lightlist = new List<Light> {
 
@@ -78,32 +80,46 @@ namespace 光线追综
 
             return new Vector3D(p.X * (vw / cw), p.Y * (vh / ch), d);
         }
-        double ComputeLighting(Vector3D p, Vector3D n)
+        List<double> ls = new List<double>();
+        double ComputeLighting(Vector3D p, Vector3D n, Vector3D v, double s)
         {
             double i = 0;
             Vector3D l = new Vector3D();
             foreach (var light in lightlist)
             {
-                switch (light.LightType)
+                if (light.LightType == LightEnum.Ambient)
                 {
-                    case LightEnum.Ambient:
-                        i += light.Intenesity;
-                        break;
-                    case LightEnum.Point:
+                    i += light.Intenesity;
+                }
+                else
+                {
+                    if (light.LightType == LightEnum.Point)
+                    {
                         l = light.Position - p;
-                        break;
-                    case LightEnum.Directional:
+                    }
+                    else
+                    {
                         l = light.Direction;
-                        break;
-                    default:
-                        break;
+                    }
+                    var dot = Vector3D.DotProduct(n, l);
+                    if (dot > 0)
+                    {
+                        i += light.Intenesity * dot / (n.Length * l.Length);
+                    }
+                    if (s != -1)
+                    {
+                        var r = 2 * Vector3D.DotProduct(n, l) * n - l;
+                        var dotv = Vector3D.DotProduct(r, v);
+                        if (dotv > 0)
+                        {
+                            i += light.Intenesity * Math.Pow(dotv / (r.Length * v.Length), s);
+                        }
+                    }
                 }
-                var dot = Vector3D.DotProduct(n, l);
-                if (dot > 0)
-                {
-                    i += light.Intenesity * dot / (n.Length * l.Length);
-                }
+
             }
+            //可以设置大1为1
+            //i>1?1:i
             return i;
         }
         Color tracrray(Vector3D origin, Vector3D dline, double min, double max)
@@ -126,14 +142,18 @@ namespace 光线追综
             }
             if (claset_sharp == null)
             {
-                return Colors.White;
+                return Colors.Transparent;
             }
             var p = origin + (closet * dline);
             var n = p - claset_sharp.center;
             n = n / n.Length;
-            var cl = ComputeLighting(p, n);
+            var cl = ComputeLighting(p, n, -dline, claset_sharp.specular);
+            //保证颜色上下限正确
+            var M = Color.FromRgb((byte)(Math.Min(255, Math.Max(0, cl * claset_sharp.color.R))),
+                (byte)(Math.Min(255, Math.Max(0, (cl * claset_sharp.color.G)))),
+                (byte)(Math.Min(255, Math.Max(0, (cl * claset_sharp.color.B)))));
 
-            return Color.FromRgb((byte)(cl * claset_sharp.color.R), (byte)(cl * claset_sharp.color.G), (byte)(cl * claset_sharp.color.B));
+            return M;
         }
         Point IntersectRayShere(Vector3D origin, Vector3D dline, sharp sharp)
         {
@@ -164,9 +184,11 @@ namespace 光线追综
                 for (double y = 0 - ch / 2; y < ch / 2; y++)
                 {
                     var D = canvastoviewport(new Point(x, y));
-                    var color = tracrray(new Vector3D(), D, 1, double.PositiveInfinity);
+                    var color = tracrray(new Vector3D(), D, 1, double.MaxValue);
                     var p = MidPoint(new Point(x, y));
+
                     byte[] colorData = { color.B, color.G, color.R, color.A };
+
                     int stride = (WriteableBitmap.PixelWidth * WriteableBitmap.Format.BitsPerPixel) / 8;
                     WriteableBitmap.WritePixels(new Int32Rect((int)p.X, (int)p.Y, 1, 1), colorData, stride, 0);
                 }
