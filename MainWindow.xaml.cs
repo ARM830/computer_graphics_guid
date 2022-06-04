@@ -22,6 +22,16 @@ namespace 光线追综
     /// </summary>
     public partial class MainWindow : Window
     {
+        class cop
+        {
+            public cop(sharp claset_sharp, double closet)
+            {
+                Claset_sharp = claset_sharp;
+                Closet = closet;
+            }
+            public sharp Claset_sharp { get; }
+            public double Closet { get; }
+        }
         enum LightEnum
         {
             Ambient,
@@ -41,6 +51,7 @@ namespace 光线追综
             public double radius { get; set; } = 1;
             public Color color { get; set; }
             public double specular { get; set; }
+            public double CloseIntersection { get; set; }
         }
         public MainWindow()
         {
@@ -81,10 +92,37 @@ namespace 光线追综
             return new Vector3D(p.X * (vw / cw), p.Y * (vh / ch), d);
         }
         List<double> ls = new List<double>();
+        cop closestIntersection(Vector3D origin, Vector3D dline, double min, double max)
+        {
+            double closet = double.PositiveInfinity;
+            sharp claset_sharp = null;
+            foreach (var item in sharplist)
+            {
+                var gp = IntersectRayShere(origin, dline, item);
+                if (gp.X >= min && gp.X <= max && gp.X < closet)
+                {
+                    closet = gp.X;
+                    claset_sharp = item;
+                    claset_sharp.CloseIntersection = closet;
+                }
+                if (gp.Y >= min && gp.Y <= max && gp.Y < closet)
+                {
+                    closet = gp.Y;
+                    claset_sharp = item;
+                    claset_sharp.CloseIntersection = closet;
+                }
+            }
+            if (claset_sharp!=null)
+            {
+                return new cop(claset_sharp, closet);
+            }
+            return null;
+        }
         double ComputeLighting(Vector3D p, Vector3D n, Vector3D v, double s)
         {
             double i = 0;
             Vector3D l = new Vector3D();
+            double tmax = 1;
             foreach (var light in lightlist)
             {
                 if (light.LightType == LightEnum.Ambient)
@@ -96,10 +134,17 @@ namespace 光线追综
                     if (light.LightType == LightEnum.Point)
                     {
                         l = light.Position - p;
+                        tmax = 1;
                     }
                     else
                     {
                         l = light.Direction;
+                        tmax = double.PositiveInfinity;
+                    }
+                    var sharpx = closestIntersection(p, l, 0.1, tmax);
+                    if (sharpx != null)
+                    {
+                        continue;
                     }
                     var dot = Vector3D.DotProduct(n, l);
                     if (dot > 0)
@@ -125,25 +170,14 @@ namespace 光线追综
         Color tracrray(Vector3D origin, Vector3D dline, double min, double max)
         {
             double closet = double.PositiveInfinity;
-            sharp claset_sharp = null;
-            foreach (var item in sharplist)
-            {
-                var gp = IntersectRayShere(origin, dline, item);
-                if (gp.X >= min && gp.X <= max && gp.X < closet)
-                {
-                    closet = gp.X;
-                    claset_sharp = item;
-                }
-                if (gp.Y >= min && gp.Y <= max && gp.Y < closet)
-                {
-                    closet = gp.Y;
-                    claset_sharp = item;
-                }
-            }
-            if (claset_sharp == null)
+            var clp = closestIntersection(origin, dline, min, max);
+         
+            if (clp == null)
             {
                 return Colors.Transparent;
             }
+            closet = clp.Closet;
+            var claset_sharp = clp.Claset_sharp;
             var p = origin + (closet * dline);
             var n = p - claset_sharp.center;
             n = n / n.Length;
