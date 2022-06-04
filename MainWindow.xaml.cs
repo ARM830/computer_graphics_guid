@@ -51,7 +51,7 @@ namespace 光线追综
             public double radius { get; set; } = 1;
             public Color color { get; set; }
             public double specular { get; set; }
-            public double CloseIntersection { get; set; }
+            public double reflective { get; set; }
         }
         public MainWindow()
         {
@@ -74,10 +74,10 @@ namespace 光线追综
         WriteableBitmap WriteableBitmap;
         List<sharp> sharplist = new List<sharp>
         {
-        new sharp() { center = new Vector3D(0, -1, 3), color = Colors.Red,specular=500 },
-        new sharp() { center = new Vector3D(2, 0, 4),  color = Colors.Blue,specular=500 },
-        new sharp() { center = new Vector3D(-2, 0, 4), color = Colors.Green ,specular=10},
-        new sharp(){center=new Vector3D(0,-5001,0), radius=5000,color=Color.FromRgb(255,255,0) ,specular=1000},
+        new sharp() { center = new Vector3D(0, -1, 3), color = Colors.Red,specular=500,reflective=0.2 },
+        new sharp() { center = new Vector3D(2, 0, 4),  color = Colors.Blue,specular=500,reflective=0.3  },
+        new sharp() { center = new Vector3D(-2, 0, 4), color = Colors.Green ,specular=10,reflective=0.4 },
+        new sharp(){center=new Vector3D(0,-5001,0), radius=5000,color=Color.FromRgb(255,255,0) ,specular=1000,reflective=0.5 },
         };
         List<Light> lightlist = new List<Light> {
 
@@ -85,6 +85,10 @@ namespace 光线追综
         new Light(){  LightType= LightEnum.Point,Intenesity=0.6,Position=new Vector3D(2,1,0) },
         new Light(){  LightType= LightEnum.Directional,Intenesity=0.2,Direction=new Vector3D(1,4,4) }
         };
+        Vector3D reflectiveray(Vector3D R, Vector3D N)
+        {
+            return 2 * N * Vector3D.DotProduct(N, R) - R;
+        }
         Point MidPoint(Point p) => new Point(p.X + 800.0 / 2, 800.0 / 2 - p.Y);
         Vector3D canvastoviewport(Point p)
         {
@@ -103,16 +107,16 @@ namespace 光线追综
                 {
                     closet = gp.X;
                     claset_sharp = item;
-                    claset_sharp.CloseIntersection = closet;
+
                 }
                 if (gp.Y >= min && gp.Y <= max && gp.Y < closet)
                 {
                     closet = gp.Y;
                     claset_sharp = item;
-                    claset_sharp.CloseIntersection = closet;
+
                 }
             }
-            if (claset_sharp!=null)
+            if (claset_sharp != null)
             {
                 return new cop(claset_sharp, closet);
             }
@@ -167,14 +171,14 @@ namespace 光线追综
             //i>1?1:i
             return i;
         }
-        Color tracrray(Vector3D origin, Vector3D dline, double min, double max)
+        Color tracrray(Vector3D origin, Vector3D dline, double min, double max, int deepth = 3)
         {
             double closet = double.PositiveInfinity;
             var clp = closestIntersection(origin, dline, min, max);
-         
+
             if (clp == null)
             {
-                return Colors.Transparent;
+                return Colors.Black;
             }
             closet = clp.Closet;
             var claset_sharp = clp.Claset_sharp;
@@ -186,9 +190,22 @@ namespace 光线追综
             var M = Color.FromRgb((byte)(Math.Min(255, Math.Max(0, cl * claset_sharp.color.R))),
                 (byte)(Math.Min(255, Math.Max(0, (cl * claset_sharp.color.G)))),
                 (byte)(Math.Min(255, Math.Max(0, (cl * claset_sharp.color.B)))));
-
-            return M;
+            if ( claset_sharp.reflective <= 0||deepth <= 0 )
+            {
+                return M;
+            }
+            var r = reflectiveray(-dline, n);
+            var color = tracrray(p, r, 0.001, double.PositiveInfinity, deepth - 1);
+            var k = 1 - claset_sharp.reflective;
+            var rgb1 = Math.Min(255, Math.Max(0, M.R * k));
+            var rgb2 = Math.Min(255, Math.Max(0, M.G * k));
+            var rgb3 = Math.Min(255, Math.Max(0, M.B * k));
+            var m2 = Color.Multiply(M, (float)k);
+            var m3 = Color.Multiply(color, (float)claset_sharp.reflective);
+            var m4 = Color.Add(m2, m3);
+            return m4;
         }
+
         Point IntersectRayShere(Vector3D origin, Vector3D dline, sharp sharp)
         {
             double r = sharp.radius;
@@ -218,7 +235,7 @@ namespace 光线追综
                 for (double y = 0 - ch / 2; y < ch / 2; y++)
                 {
                     var D = canvastoviewport(new Point(x, y));
-                    var color = tracrray(new Vector3D(), D, 1, double.MaxValue);
+                    var color = tracrray(new Vector3D(), D, 1, double.MaxValue,10);
                     var p = MidPoint(new Point(x, y));
 
                     byte[] colorData = { color.B, color.G, color.R, color.A };
