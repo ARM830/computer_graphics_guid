@@ -108,7 +108,7 @@ namespace 光线追综
                 {
                     case LightEnum.Ambient:
                         i += light.Intenesity;
-                        break;
+                        continue;
                     case LightEnum.Point:
                         l = light.Position - p;
                         break;
