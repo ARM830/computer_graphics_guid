@@ -68,7 +68,7 @@ namespace 光线追综
 
             WriteableBitmap = new WriteableBitmap(800, 800, 96, 96, PixelFormats.Bgra32, BitmapPalettes.WebPaletteTransparent);
             img.Source = WriteableBitmap;
-            Start();
+            // Start(1);
         }
 
         WriteableBitmap WriteableBitmap;
@@ -77,7 +77,7 @@ namespace 光线追综
         new sharp() { center = new Vector3D(0, -1, 3), color = Colors.Red,specular=500,reflective=0.2 },
         new sharp() { center = new Vector3D(2, 0, 4),  color = Colors.Blue,specular=500,reflective=0.3  },
         new sharp() { center = new Vector3D(-2, 0, 4), color = Colors.Green ,specular=10,reflective=0.4 },
-        new sharp(){center=new Vector3D(0,-5001,0), radius=5000,color=Color.FromRgb(255,255,0) ,specular=1000,reflective=0.5 },
+       // new sharp(){center=new Vector3D(0,-5001,0), radius=5000,color=Color.FromRgb(255,255,0) ,specular=1000,reflective=0.5 },
         };
         List<Light> lightlist = new List<Light> {
 
@@ -103,13 +103,15 @@ namespace 光线追综
             foreach (var item in sharplist)
             {
                 var gp = IntersectRayShere(origin, dline, item);
-                if (gp.X >= min && gp.X <= max && gp.X < closet)
-                {
-                    closet = gp.X;
-                    claset_sharp = item;
+                var ray = gp.X >= gp.Y ? gp.X : gp.Y;
 
-                }
-                if (gp.Y >= min && gp.Y <= max && gp.Y < closet)
+                //if (gp.X >= min && gp.X <= max && gp.X < closet)
+                //{
+                //    closet = gp.X;
+                //    claset_sharp = item;
+                //
+                //}
+                if (ray >= min && ray <= max && ray < closet)
                 {
                     closet = gp.Y;
                     claset_sharp = item;
@@ -190,7 +192,7 @@ namespace 光线追综
             var M = Color.FromRgb((byte)(Math.Min(255, Math.Max(0, cl * claset_sharp.color.R))),
                 (byte)(Math.Min(255, Math.Max(0, (cl * claset_sharp.color.G)))),
                 (byte)(Math.Min(255, Math.Max(0, (cl * claset_sharp.color.B)))));
-            if ( claset_sharp.reflective <= 0||deepth <= 0 )
+            if (claset_sharp.reflective <= 0 || deepth <= 0)
             {
                 return M;
             }
@@ -227,15 +229,16 @@ namespace 光线追综
         double vw = 1.0;
         double vh = 1.0;
         double d = 1.0;
-        void Start()
+        void Start(int deeep)
         {
+
             WriteableBitmap.Lock();
             for (double x = 0 - cw / 2; x < cw / 2; x++)
             {
                 for (double y = 0 - ch / 2; y < ch / 2; y++)
                 {
                     var D = canvastoviewport(new Point(x, y));
-                    var color = tracrray(new Vector3D(), D, 1, double.MaxValue,10);
+                    var color = tracrray(new Vector3D(), D, 1, double.MaxValue, deeep);
                     var p = MidPoint(new Point(x, y));
 
                     byte[] colorData = { color.B, color.G, color.R, color.A };
@@ -246,6 +249,21 @@ namespace 光线追综
             }
             WriteableBitmap.Unlock();
 
+        }
+
+
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.IsLoaded)
+            {
+                Start((int)sl.Value);
+                sl.Value += 1;
+                if (sl.Value == 10)
+                {
+                    sl.Value = 0;
+                }
+            }
         }
     }
 }
