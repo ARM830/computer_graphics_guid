@@ -83,7 +83,27 @@ namespace 光线追综
             double i = 0;
             Vector3D l = new Vector3D();
             foreach (var light in lightlist)
-            {
+            {  //不同的写法
+               //if (light.LightType == LightEnum.Ambient)
+               //{
+               //    i += light.Intenesity;
+               //}
+               //else
+               //{
+               //    if (light.LightType == LightEnum.Point)
+               //    {
+               //        l = light.Position - p;
+               //    }
+               //    else
+               //    {
+               //        l = light.Direction;
+               //    }
+               //    var dot = Vector3D.DotProduct(n, l);
+               //    if (dot > 0)
+               //    {
+               //        i += light.Intenesity * dot / (n.Length * l.Length);
+               //    }
+               //}
                 switch (light.LightType)
                 {
                     case LightEnum.Ambient:
