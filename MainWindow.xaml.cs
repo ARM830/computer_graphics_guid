@@ -29,8 +29,14 @@ namespace 光线追综
                 Claset_sharp = claset_sharp;
                 Closet = closet;
             }
-            public sharp Claset_sharp { get; }
-            public double Closet { get; }
+            public sharp Claset_sharp
+            {
+                get;
+            }
+            public double Closet
+            {
+                get;
+            }
         }
         enum LightEnum
         {
@@ -40,18 +46,42 @@ namespace 光线追综
         }
         class Light
         {
-            public Vector3D Direction { get; set; }
-            public Vector3D Position { get; set; }
-            public LightEnum LightType { get; set; }
-            public double Intenesity { get; set; }
+            public Vector3D Direction
+            {
+                get; set;
+            }
+            public Vector3D Position
+            {
+                get; set;
+            }
+            public LightEnum LightType
+            {
+                get; set;
+            }
+            public double Intenesity
+            {
+                get; set;
+            }
         }
         class sharp
         {
-            public Vector3D center { get; set; }
+            public Vector3D center
+            {
+                get; set;
+            }
             public double radius { get; set; } = 1;
-            public Color color { get; set; }
-            public double specular { get; set; }
-            public double reflective { get; set; }
+            public Color color
+            {
+                get; set;
+            }
+            public double specular
+            {
+                get; set;
+            }
+            public double reflective
+            {
+                get; set;
+            }
         }
         public MainWindow()
         {
@@ -190,7 +220,7 @@ namespace 光线追综
             var M = Color.FromRgb((byte)(Math.Min(255, Math.Max(0, cl * claset_sharp.color.R))),
                 (byte)(Math.Min(255, Math.Max(0, (cl * claset_sharp.color.G)))),
                 (byte)(Math.Min(255, Math.Max(0, (cl * claset_sharp.color.B)))));
-            if ( claset_sharp.reflective <= 0||deepth <= 0 )
+            if (claset_sharp.reflective <= 0 || deepth <= 0)
             {
                 return M;
             }
@@ -235,7 +265,7 @@ namespace 光线追综
                 for (double y = 0 - ch / 2; y < ch / 2; y++)
                 {
                     var D = canvastoviewport(new Point(x, y));
-                    var color = tracrray(new Vector3D(), D, 1, double.MaxValue,10);
+                    var color = tracrray(new Vector3D(), D, 1, double.MaxValue, 10);
                     var p = MidPoint(new Point(x, y));
 
                     byte[] colorData = { color.B, color.G, color.R, color.A };
