@@ -141,8 +141,8 @@ namespace 光线追综
                         l = light.Direction;
                         tmax = double.PositiveInfinity;
                     }
-                    var sharpx = closestIntersection(p, l, 0.1, tmax);
-                    if (sharpx != null)
+                    var sharpx = closestIntersection(p, l,0.000000001, tmax);
+                    if (sharpx != null) 
                     {
                         continue;
                     }
