@@ -29,8 +29,14 @@ namespace 光线追综
                 Claset_sharp = claset_sharp;
                 Closet = closet;
             }
-            public sharp Claset_sharp { get; }
-            public double Closet { get; }
+            public sharp Claset_sharp
+            {
+                get;
+            }
+            public double Closet
+            {
+                get;
+            }
         }
         enum LightEnum
         {
@@ -40,18 +46,42 @@ namespace 光线追综
         }
         class Light
         {
-            public Vector3D Direction { get; set; }
-            public Vector3D Position { get; set; }
-            public LightEnum LightType { get; set; }
-            public double Intenesity { get; set; }
+            public Vector3D Direction
+            {
+                get; set;
+            }
+            public Vector3D Position
+            {
+                get; set;
+            }
+            public LightEnum LightType
+            {
+                get; set;
+            }
+            public double Intenesity
+            {
+                get; set;
+            }
         }
         class sharp
         {
-            public Vector3D center { get; set; }
+            public Vector3D center
+            {
+                get; set;
+            }
             public double radius { get; set; } = 1;
-            public Color color { get; set; }
-            public double specular { get; set; }
-            public double CloseIntersection { get; set; }
+            public Color color
+            {
+                get; set;
+            }
+            public double specular
+            {
+                get; set;
+            }
+            public double CloseIntersection
+            {
+                get; set;
+            }
         }
         public MainWindow()
         {
@@ -112,7 +142,7 @@ namespace 光线追综
                     claset_sharp.CloseIntersection = closet;
                 }
             }
-            if (claset_sharp!=null)
+            if (claset_sharp != null)
             {
                 return new cop(claset_sharp, closet);
             }
@@ -141,9 +171,13 @@ namespace 光线追综
                         l = light.Direction;
                         tmax = double.PositiveInfinity;
                     }
-                    var sharpx = closestIntersection(p, l,0.0000000001, tmax);
-                    if (sharpx != null) 
+                    var sharpx = closestIntersection(p, l, 0.0000000001, tmax);
+                    //此时存在，则意味着光源和点之间存在物体
+                    if (sharpx != null)
                     {
+
+                        //不计算此刻光源
+                        //此点一定会返回环境光
                         continue;
                     }
                     var dot = Vector3D.DotProduct(n, l);
@@ -171,7 +205,7 @@ namespace 光线追综
         {
             double closet = double.PositiveInfinity;
             var clp = closestIntersection(origin, dline, min, max);
-         
+
             if (clp == null)
             {
                 return Colors.Transparent;
