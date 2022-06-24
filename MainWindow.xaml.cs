@@ -30,17 +30,38 @@ namespace 光线追综
         }
         class Light
         {
-            public Vector3D Direction { get; set; }
-            public Vector3D Position { get; set; }
-            public LightEnum LightType { get; set; }
-            public double Intenesity { get; set; }
+            public Vector3D Direction
+            {
+                get; set;
+            }
+            public Vector3D Position
+            {
+                get; set;
+            }
+            public LightEnum LightType
+            {
+                get; set;
+            }
+            public double Intenesity
+            {
+                get; set;
+            }
         }
         class sharp
         {
-            public Vector3D center { get; set; }
+            public Vector3D center
+            {
+                get; set;
+            }
             public double radius { get; set; } = 1;
-            public Color color { get; set; }
-            public double specular { get; set; }
+            public Color color
+            {
+                get; set;
+            }
+            public double specular
+            {
+                get; set;
+            }
         }
         public MainWindow()
         {
