@@ -92,9 +92,9 @@ namespace 光线追综
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            cw = 800.0 / 2;
-
-            ch = 800.0 / 2;
+            cw = 700.0; // 2;
+                        // ;
+            ch = 700.0; // 2;
 
             WriteableBitmap = new WriteableBitmap(800, 800, 96, 96, PixelFormats.Bgra32, BitmapPalettes.WebPaletteTransparent);
             img.Source = WriteableBitmap;
@@ -115,7 +115,7 @@ namespace 光线追综
         new Light(){  LightType= LightEnum.Point,Intenesity=0.6,Position=new Vector3D(2,1,0) },
         new Light(){  LightType= LightEnum.Directional,Intenesity=0.2,Direction=new Vector3D(1,4,4) }
         };
-        Point MidPoint(Point p) => new Point(p.X + 800.0 / 2, 800.0 / 2 - p.Y);
+        Point MidPoint(Point p) => new Point(p.X + 350, 350 - p.Y);
         Vector3D canvastoviewport(Point p)
         {
 
