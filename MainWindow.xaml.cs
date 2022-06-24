@@ -104,6 +104,8 @@ namespace 光线追综
                //        i += light.Intenesity * dot / (n.Length * l.Length);
                //    }
                //}
+
+                //对于每种光不同的处理
                 switch (light.LightType)
                 {
                     case LightEnum.Ambient:
