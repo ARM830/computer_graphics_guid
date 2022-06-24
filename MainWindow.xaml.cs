@@ -23,9 +23,15 @@ namespace 光线追综
     {
         class sharp
         {
-            public Vector3D center { get; set; }
+            public Vector3D center
+            {
+                get; set;
+            }
             public double radius { get; set; } = 1;
-            public Color color { get; set; }
+            public Color color
+            {
+                get; set;
+            }
         }
         public MainWindow()
         {
