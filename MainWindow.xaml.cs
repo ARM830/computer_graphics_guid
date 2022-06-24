@@ -64,13 +64,23 @@ namespace 光线追综
 
             return new Vector3D(p.X * (vw / cw), p.Y * (vh / ch), d);
         }
+        /// <summary>
+        /// 光线追踪
+        /// </summary>
+        /// <param name="origin">起点</param>
+        /// <param name="dline">方向</param>
+        /// <param name="min">射线最小值</param>
+        /// <param name="max">射线最大值</param>
         Color tracrray(Vector3D origin, Vector3D dline, double min, double max)
         {
             double closet = double.PositiveInfinity;
             sharp claset_sharp = null;
+            //遍历模型
             foreach (var item in sharplist)
             {
+                //求解是否与圆相交
                 var gp = IntersectRayShere(origin, dline, item);
+                //小于判断
                 if (gp.X >= min && gp.X <= max && gp.X < closet)
                 {
                     closet = gp.X;
@@ -82,26 +92,43 @@ namespace 光线追综
                     claset_sharp = item;
                 }
             }
+            //不存在返回空白值
             if (claset_sharp == null)
             {
                 return Colors.White;
             }
+            //
             return claset_sharp.color;
         }
+        /// <summary>
+        /// 求解一元二次
+        /// </summary>
+        /// <param name="origin">起点</param>
+        /// <param name="dline">向量</param>
+        /// <param name="sharp">球体</param>
+        /// <returns></returns>
         Point IntersectRayShere(Vector3D origin, Vector3D dline, sharp sharp)
         {
+            //半径
             double r = sharp.radius;
+            //起点到圆心
             var co = origin - sharp.center;
+
             var a = Vector3D.DotProduct(dline, dline);
+
             var b = 2 * Vector3D.DotProduct(co, dline);
+
             var c = Vector3D.DotProduct(co, co) - r * r;
+
             var discrinimant = b * b - 4 * a * c;
+
             if (discrinimant < 0)
             {
                 return new Point();
             }
             var t1 = (-b + Math.Sqrt(discrinimant)) / (2 * a);
             var t2 = (-b - Math.Sqrt(discrinimant)) / (2 * a);
+            //偷懒
             return new Point(t1, t2);
         }
         double cw = 0;
@@ -112,15 +139,22 @@ namespace 光线追综
         void Start()
         {
             WriteableBitmap.Lock();
+            //画布开始
             for (double x = 0 - cw / 2; x < cw / 2; x++)
             {
                 for (double y = 0 - ch / 2; y < ch / 2; y++)
                 {
+                    //画布到视口
                     var D = canvastoviewport(new Point(x, y));
+                    //获取像素颜色
                     var color = tracrray(new Vector3D(), D, 1, double.PositiveInfinity);
+                    //坐标系转换
                     var p = MidPoint(new Point(x, y));
+                    //定义颜色BGRA
                     byte[] colorData = { color.B, color.G, color.R, color.A };
+                    //跨距
                     int stride = (WriteableBitmap.PixelWidth * WriteableBitmap.Format.BitsPerPixel) / 8;
+                    //绘制
                     WriteableBitmap.WritePixels(new Int32Rect((int)p.X, (int)p.Y, 1, 1), colorData, stride, 0);
                 }
             }
