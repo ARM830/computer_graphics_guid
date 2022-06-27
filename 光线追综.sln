@@ -5,6 +5,8 @@ VisualStudioVersion = 17.2.32602.215
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "光线追综", "光线追综.csproj", "{D45096C0-EF04-4AEE-A65D-BF905970A302}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "光栅化", "..\光栅化\光栅化.csproj", "{211B0141-4178-4A8A-B6FF-017F8562B71D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{D45096C0-EF04-4AEE-A65D-BF905970A302}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D45096C0-EF04-4AEE-A65D-BF905970A302}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D45096C0-EF04-4AEE-A65D-BF905970A302}.Release|Any CPU.Build.0 = Release|Any CPU
+		{211B0141-4178-4A8A-B6FF-017F8562B71D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{211B0141-4178-4A8A-B6FF-017F8562B71D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{211B0141-4178-4A8A-B6FF-017F8562B71D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{211B0141-4178-4A8A-B6FF-017F8562B71D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
