@@ -78,6 +78,12 @@ namespace 光线追综
 
             return new Vector3D(p.X * (vw / cw), p.Y * (vh / ch), d);
         }
+        /// <summary>
+        /// 计算光
+        /// </summary>
+        /// <param name="p">表面点P</param>
+        /// <param name="n">法向量</param>
+        /// <returns>强度</returns>
         double ComputeLighting(Vector3D p, Vector3D n)
         {
             double i = 0;
