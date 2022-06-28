@@ -164,12 +164,12 @@ namespace 光线追综
                     if (light.LightType == LightEnum.Point)
                     {
                         l = light.Position - p;
-                        tmax = 1;
+                        tmax =l.Length;//tmax=1;
                     }
                     else
                     {
                         l = light.Direction;
-                        tmax = double.PositiveInfinity;
+                        tmax =(light.Position-p).Length;//tmax=intf
                     }
                     var sharpx = closestIntersection(p, l, 0.0000000001, tmax);
                     //此时存在，则意味着光源和点之间存在物体
