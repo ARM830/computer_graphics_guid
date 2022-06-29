@@ -38,33 +38,14 @@ namespace 光栅化
 
         private void Start()
         {
-            WriteableBitmap.Lock();
-            DrawLine(new Point(100, -200), new Point(60, 240), Colors.Red);
-            WriteableBitmap.Unlock();
-        }
-        Point ConverterPoint(Point p) => new Point(p.X + bitmapwidth / 2, bitmapheight / 2 - p.Y);
-        private void DrawLine(Point start, Point end, Color color)
-        {
-            if (start.X > end.X)
-            {
-                Swap(ref start, ref end);
-            }
-            var a = (end.Y - start.Y) / (end.X - start.X);
-            var b = start.Y - a * start.X;
-            byte[] colorData = { color.B, color.G, color.R, color.A };
-            int stride = (WriteableBitmap.PixelWidth * WriteableBitmap.Format.BitsPerPixel) / 8;
-            var y = start.Y;
-            for (double x = start.X; x < end.X; x++)
-            {
-                var p = ConverterPoint(new Point(x, y));
-                WriteableBitmap.WritePixels(new Int32Rect((int)p.X, (int)p.Y, 1, 1), colorData, stride, 0);
-                y += a;
-            }
+            // WriteableBitmap.DrawLineNormal(new Point(100, -200), new Point(60, 240), Colors.Red);
+            //  WriteableBitmap.DrawLineNormal(new Point(200, -300), new Point(160, 340), Colors.Red);
+            WriteableBitmap.DrawLine(new Point(0, -300), new Point(0,300), Colors.Black);
+            WriteableBitmap.DrawLine(new Point(-300, 0), new Point(300, 0), Colors.Black);
+            WriteableBitmap.DrawTriangle(new Point(-200,-250), new Point(200, 50), new Point(20, 250),Colors.Red);
+
+
         }
 
-        private static void Swap(ref Point start, ref Point end)
-        {
-            (end, start) = (start, end);
-        }
     }
 }
