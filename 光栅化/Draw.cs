@@ -52,6 +52,69 @@ namespace 光栅化
             }
             return list;
         }
+        public static void DrawFillTriangle(this WriteableBitmap bitmap, Point p0, Point p1, Point p2, Color color)
+        {
+            bitmap.Lock();
+            byte[] colorData = { color.B, color.G, color.R, color.A };
+            int stride = (bitmap.PixelWidth * bitmap.Format.BitsPerPixel) / 8;
+            CompareAndSwap(ref p1, ref p0, false);
+            CompareAndSwap(ref p2, ref p0, false);
+            CompareAndSwap(ref p2, ref p1, false);
+            var x01 = Interpolate(p0.Y, p0.X, p1.Y, p1.X);
+            var x12 = Interpolate(p1.Y, p1.X, p2.Y, p2.X);
+            var x02 = Interpolate(p0.Y, p0.X, p2.Y, p2.X);
+            x01.Remove(x01.Last().Key);
+            var x012 = x01.Union(x12).ToDictionary(x => x.Key, x => x.Value);
+            double m = x012.Count() / 2;
+            Dictionary<double, double> left = new Dictionary<double, double>();
+            Dictionary<double, double> right = new Dictionary<double, double>();
+            if (x02[m] < x012[m])
+            {
+                left = x02;
+                right = x012;
+            }
+            else
+            {
+                left = x012;
+                right = x02;
+            }
+            for (double y = p0.Y; y <= p2.Y; y++)
+            {
+                for (double x = left[y]; x <= right[p2.Y]; x++)
+                {
+                    var p = new Point(x, y).ConverterPointInt();
+                    bitmap.WritePixels(new Int32Rect(p.X, p.Y, 1, 1), colorData, stride, 0);
+
+                }
+            }
+            bitmap.Unlock();
+        }
+        public static bool ComparePoint(Point p1, Point p2, bool isX = true)
+        {
+            if (isX)
+            {
+                if (p1.X < p2.X)
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                if (p1.Y < p2.Y)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public static void CompareAndSwap(ref Point p1, ref Point p2, bool isX = true)
+        {
+            if (ComparePoint(p1, p2, isX))
+            {
+                Swap(ref p1, ref p2);
+            }
+        }
+
         public static void DrawTriangle(this WriteableBitmap bitmap, Point p0, Point p1, Point p2, Color color)
         {
             bitmap.DrawLine(p0, p1, color);
@@ -74,7 +137,7 @@ namespace 光栅化
                 }
 
                 var y = Interpolate(start.X, start.Y, end.X, end.Y);
-                for (double x = start.X; x < end.X; x++)
+                for (double x = start.X; x <= end.X; x++)
                 {
                     var p = new Point(x, y[x]).ConverterPointInt();
                     bitmap.WritePixels(new Int32Rect(p.X, p.Y, 1, 1), colorData, stride, 0);
@@ -89,7 +152,7 @@ namespace 光栅化
 
                 }
                 var x = Interpolate(start.Y, start.X, end.Y, end.X);
-                for (double y = start.Y; y < end.Y; y++)
+                for (double y = start.Y; y <= end.Y; y++)
                 {
 
                     var p = new Point(x[y], y).ConverterPointInt();
