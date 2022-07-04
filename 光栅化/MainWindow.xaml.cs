@@ -44,8 +44,9 @@ namespace 光栅化
             WriteableBitmap.DrawLine(new Point(-300, 0), new Point(300, 0), Colors.Black);
             WriteableBitmap.DrawTriangle(new Point(-200, 130), new Point(200,130), new Point(200, 250), Colors.Black);
             WriteableBitmap.DrawFillTriangle(new Point(-200,0), new Point(200, 0), new Point(200, 120),Colors.Red);
-
-
+            WriteableBitmap.DrawShadedTriagngle(new Point(-100, 0), new Point(100, 0), new Point(100, 120), Colors.Red);
+            WriteableBitmap.DrawShadedTriagngle(new Point(-200, 100), new Point(100, 100), new Point(100, 240), Colors.Green);
+           // WriteableBitmap.DrawShadedTriagngle(new Point(-200, 0), new Point(200, 0), new Point(200, 120), Colors.Red);
         }
 
     }

@@ -35,22 +35,85 @@ namespace 光栅化
     {
         public static int bitmapheight = 800;
         public static int bitmapwidth = 800;
-        public static Dictionary<double, Double> Interpolate(double i0, double d0, double i1, double d1)
+        public static List<double> Interpolate(double i0, double d0, double i1, double d1)
         {
-            Dictionary<double, Double> list = new Dictionary<double, Double>();
+            List<double> list = new List<double>();
             if (i0 == i1)
             {
-                list.Add(i0, d0);
+                list.Add(d0);
                 return list;
             }
             var a = (d1 - d0) / (i1 - i0);
             var d = d0;
             for (double i = i0; i <= i1; i++)
             {
-                list.Add(i, d);
+                list.Add(d);
                 d += a;
             }
             return list;
+        }
+        public static void DrawShadedTriagngle(this WriteableBitmap bitmap, Point p0, Point p1, Point p2, Color color)
+        {
+            bitmap.Lock();
+            int stride = (bitmap.PixelWidth * bitmap.Format.BitsPerPixel) / 8;
+            CompareAndSwap(ref p1, ref p0, false);
+            CompareAndSwap(ref p2, ref p0, false);
+            CompareAndSwap(ref p2, ref p1, false);
+
+            var x01 = Interpolate(p0.Y, p0.X, p1.Y, p1.X);
+            var h01 = Interpolate(p0.Y, 0.3, p1.Y, 0.1);
+
+            var x12 = Interpolate(p1.Y, p1.X, p2.Y, p2.X);
+            var h12 = Interpolate(p1.Y, 0.1, p2.Y, 1.0);
+
+            var x02 = Interpolate(p0.Y, p0.X, p2.Y, p2.X);
+            var h02 = Interpolate(p0.Y, 0.3, p2.Y, 1.0);
+
+            var k = x01.Remove(x01.Last());
+            var x012 = x01.Concat(x12).ToList();
+
+            k = h01.Remove(h01.Last());
+
+            var h012 = h01.Concat(h12).ToList();
+
+            int m = x02.Count() / 2;
+
+            List<double> left = new List<double>();
+
+            List<double> right = new List<double>();
+
+            List<double> hleft = new List<double>();
+
+            List<double> hright = new List<double>();
+            if (x02[m] < x012[m])
+            {
+                left = x02;
+                right = x012;
+                hleft = h02;
+                hright = h012;
+            }
+            else
+            {
+                left = x012;
+                right = x02;
+
+                hleft = h012;
+                hright = h02;
+            }
+            for (int y = 0; y < p2.Y - p0.Y; y++)
+            {
+                var xl = left[y];
+                var xr = right[y];
+                var h_segment = Interpolate(xl, hleft[y], xr, hright[y]);
+                for (int x = (int)xl; x <xr; x++)
+                {
+                    byte[] colorData = { (byte)(h_segment[(int)(x-xl)] * color.B), (byte)(h_segment[(int)(x - xl)] * color.G), (byte)(h_segment[(int)(x - xl)] * color.R), 255 };
+                    var p = new Point(x, y).ConverterPointInt();
+                    bitmap.WritePixels(new Int32Rect(p.X, p.Y, 1, 1), colorData, stride, 0);
+
+                }
+            }
+            bitmap.Unlock();
         }
         public static void DrawFillTriangle(this WriteableBitmap bitmap, Point p0, Point p1, Point p2, Color color)
         {
@@ -63,11 +126,11 @@ namespace 光栅化
             var x01 = Interpolate(p0.Y, p0.X, p1.Y, p1.X);
             var x12 = Interpolate(p1.Y, p1.X, p2.Y, p2.X);
             var x02 = Interpolate(p0.Y, p0.X, p2.Y, p2.X);
-            x01.Remove(x01.Last().Key);
-            var x012 = x01.Union(x12).ToDictionary(x => x.Key, x => x.Value);
-            double m = x012.Count() / 2;
-            Dictionary<double, double> left = new Dictionary<double, double>();
-            Dictionary<double, double> right = new Dictionary<double, double>();
+            x01.Remove(x01.Last());
+            var x012 = x01.Concat(x12).ToList();
+            int m = x02.Count() / 2;
+            List<double> left = new List<double>();
+            List<double> right = new List<double>();
             if (x02[m] < x012[m])
             {
                 left = x02;
@@ -78,9 +141,9 @@ namespace 光栅化
                 left = x012;
                 right = x02;
             }
-            for (double y = p0.Y; y <= p2.Y; y++)
+            for (int y = 0; y <= p2.Y - p0.Y; y++)
             {
-                for (double x = left[y]; x <= right[p2.Y]; x++)
+                for (int x = (int)left[y]; x <= right[(int)(p2.Y - p0.Y)]; x++)
                 {
                     var p = new Point(x, y).ConverterPointInt();
                     bitmap.WritePixels(new Int32Rect(p.X, p.Y, 1, 1), colorData, stride, 0);
@@ -139,7 +202,7 @@ namespace 光栅化
                 var y = Interpolate(start.X, start.Y, end.X, end.Y);
                 for (double x = start.X; x <= end.X; x++)
                 {
-                    var p = new Point(x, y[x]).ConverterPointInt();
+                    var p = new Point(x, y[(int)(x - start.X)]).ConverterPointInt();
                     bitmap.WritePixels(new Int32Rect(p.X, p.Y, 1, 1), colorData, stride, 0);
 
                 }
@@ -155,7 +218,7 @@ namespace 光栅化
                 for (double y = start.Y; y <= end.Y; y++)
                 {
 
-                    var p = new Point(x[y], y).ConverterPointInt();
+                    var p = new Point(x[(int)(y - start.Y)], y).ConverterPointInt();
                     bitmap.WritePixels(new Int32Rect(p.X, p.Y, 1, 1), colorData, stride, 0);
 
                 }
