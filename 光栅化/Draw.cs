@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.Media3D;
 
 namespace 光栅化
 {
@@ -31,6 +32,21 @@ namespace 光栅化
             get; set;
         }
     }
+    public static class Draw3D
+    {
+        public static double ViewWidth = 1;
+        public static double ViewHeight = 1;
+        public static double ViewZd =1;
+        public static Point ViewPortTo2D(double x, double y)
+        {
+            return new Point(x * Draw.bitmapwidth / ViewWidth, y * Draw.bitmapheight / ViewHeight);
+        }
+
+        public static Point ProjectVertex(this WriteableBitmap bitmap, Vector3D vector)
+        {
+            return ViewPortTo2D(vector.X * ViewZd / vector.Z, vector.Y * ViewZd / vector.Z);
+        }
+    }
     public static class Draw
     {
         public static int bitmapheight = 800;
@@ -52,6 +68,7 @@ namespace 光栅化
             }
             return list;
         }
+
         public static void DrawShadedTriagngle(this WriteableBitmap bitmap, Point p0, Point p1, Point p2, Color color)
         {
             bitmap.Lock();
@@ -105,9 +122,9 @@ namespace 光栅化
                 var xl = left[y];
                 var xr = right[y];
                 var h_segment = Interpolate(xl, hleft[y], xr, hright[y]);
-                for (int x = (int)xl; x <xr; x++)
+                for (int x = (int)xl; x < xr; x++)
                 {
-                    byte[] colorData = { (byte)(h_segment[(int)(x-xl)] * color.B), (byte)(h_segment[(int)(x - xl)] * color.G), (byte)(h_segment[(int)(x - xl)] * color.R), 255 };
+                    byte[] colorData = { (byte)(h_segment[(int)(x - xl)] * color.B), (byte)(h_segment[(int)(x - xl)] * color.G), (byte)(h_segment[(int)(x - xl)] * color.R), 255 };
                     var p = new Point(x, y).ConverterPointInt();
                     bitmap.WritePixels(new Int32Rect(p.X, p.Y, 1, 1), colorData, stride, 0);
 
